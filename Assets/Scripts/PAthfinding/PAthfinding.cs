@@ -49,18 +49,18 @@ public class PAthfinding : MonoBehaviour
 
         List<Node> openList = new List<Node>();
         HashSet<Node> closeList = new HashSet<Node>();
-
-        openList.Add(startNode);
-        while(openList.Count > 0)
+        startNode.SetGCost(0); 
+        openList.Add(startNode);//add the starting node to openList
+        int listrunIndex = 0;
+        while (openList.Count > 0)
         {
             Node currentNode = openList[0];
-            for (int i = 1; i < openList.Count; i++)
+            for (int i = 0; i < openList.Count; i++)
             {
-                int gCost = openList[i].GetGCost(startPos);
-                openList[i].SetGCost(gCost);
-                int hCost = openList[i].getHCost(endPos);
-                openList[i].SetHCost(hCost);
-                if(openList[i].FCost < currentNode.FCost || openList[i].FCost == currentNode.FCost && openList[i].HCost < currentNode.HCost)
+                int gCost = openList[i].GCost;
+                Debug.Log("Current node's gCost=" + openList[i].GCost);
+                int hCost = openList[i].HCost;
+                if(openList[i].FCost < currentNode.FCost || openList[i].FCost == currentNode.FCost && openList[i].HCost < currentNode.HCost) //compare the costs
                 {
                     currentNode = openList[i];
                 }
@@ -77,12 +77,22 @@ public class PAthfinding : MonoBehaviour
                 {
                     continue;
                 }
-                int moveCost = currentNode.FCost;
+                Vector2 difference = currentNode.Position - neighbourNode.Position;
+                float xF = difference.x;
+                float yF = difference.y;
+                xF = Mathf.Abs(xF);
+                int xPoint = Mathf.FloorToInt(xF);
+                yF = Mathf.Abs(yF);
+                int yPoint = Mathf.FloorToInt(yF);
+                int neighBourCost = xPoint + yPoint;
+                int moveCost = currentNode.GCost + neighBourCost;
+                neighbourNode.SetGCost(neighBourCost);
+                Debug.Log("Movecost: " + moveCost);
 
-                if(moveCost < neighbourNode.GCost || !openList.Contains(neighbourNode))
+                if(moveCost < neighbourNode.GCost) //NEED TO SET THE GCOST BEFORE THIS?
                 {
-                    //neighbourNode.SetGCost(moveCost);
-                    //neighbourNode.SetHCost(GetManhattenDistance(neighbourNode, endNode));
+                    neighbourNode.SetGCost(moveCost);
+                    Debug.Log("Set new gcost");
                     neighbourNode.SetParent(currentNode);
 
                     if (!openList.Contains(neighbourNode))
@@ -91,7 +101,9 @@ public class PAthfinding : MonoBehaviour
                     }
                 }
             }
+            listrunIndex++;
         }
+        Debug.Log("List run: " + listrunIndex + " times");
     }
     void GetFinalPath(Node startNode, Node endNode)
     {
@@ -155,16 +167,16 @@ public class PAthfinding : MonoBehaviour
     }
         Node NodeFromWorldPosition(Vector2 worldPos)
     {
-        float xPoint = ((worldPos.x * size.x / 2) / size.x);
-        float yPoint = ((worldPos.y * size.y / 2) / size.y);
+        Vector2 bottomLeft = (Vector2)transform.position - Vector2.right * size.x / 2 - Vector2.up * size.y / 2;
+        int xPoint = Mathf.FloorToInt(((worldPos.x - bottomLeft.x) / nodeDiameter));
 
-        xPoint = Mathf.Clamp01(xPoint);
-        yPoint = Mathf.Clamp01(yPoint);
+        int yPoint = Mathf.FloorToInt(((worldPos.y -bottomLeft.y) / nodeDiameter));
+        Debug.Log("worldPos: " + worldPos);
+        Debug.Log("Before clamping: " + "\n" + "xPoint: " + xPoint + " ,yPoint: " + yPoint);
 
-        int x = Mathf.RoundToInt((gridSizeX - 1) * xPoint);
-        int y = Mathf.RoundToInt((gridSizeY-1) * yPoint);
+        Debug.Log("After clamping: " + "\n" + "xPoint: " + xPoint + " ,yPoint: " + yPoint);
 
-        return grid[x, y];
+        return grid[xPoint, yPoint];
     }
     private void OnDrawGizmos()
     {
@@ -179,8 +191,8 @@ public class PAthfinding : MonoBehaviour
             GUIStyle style = new GUIStyle();
             style.fontSize = fontSize;
             Gizmos.color = Color.white;
-            Node startNode = NodeFromWorldPosition(start.position);
-            Node endNode = NodeFromWorldPosition(goal.position);
+            //Node startNode = NodeFromWorldPosition(start.position);
+            //Node endNode = NodeFromWorldPosition(goal.position);
             foreach (Node node in grid)
             {
                 Debug.Log("Draw cubes");
@@ -189,12 +201,12 @@ public class PAthfinding : MonoBehaviour
                 if (showGCost)
                 {
                     style.normal.textColor = Color.red;
-                    Handles.Label(node.Position + (new Vector2(-.5f, .5f) * nodeRadius), "G: " + node.GetGCost(start.position).ToString(), style);
+                    Handles.Label(node.Position + (new Vector2(-.5f, .5f) * nodeRadius), "G: " + node.GCost.ToString(), style);
                 }
                 if (showHCost)
                 {
                     style.normal.textColor = Color.blue;
-                    Handles.Label(node.Position + (new Vector2(.3f, .5f) * nodeRadius), "H: " + node.getHCost(goal.position).ToString(), style);
+                    Handles.Label(node.Position + (new Vector2(.3f, .5f) * nodeRadius), "H: " + node.HCost, style);
                 }
                 if (showFCost)
                 {

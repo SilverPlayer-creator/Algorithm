@@ -35,34 +35,12 @@ public class Node
     {
         get { return _position; }
     }
-    public int GetGCost(Vector2 start)
-    {
-        //get the cost from where the starting position is
-        Vector2 distance = _position - start;
-        int x = Mathf.Abs(RoundToInt(distance.x));
-        int y = Mathf.Abs(RoundToInt(distance.y));
-        _gCost = x + y;
-        return _gCost;
-
-    }
-    public int getHCost(Vector2 goal)
-    {
-        Vector2 distance = goal - _position;
-        int x = Mathf.Abs(RoundToInt(distance.x));
-        int y = Mathf.Abs(RoundToInt(distance.y));
-        _hCost = x + y;
-        return _hCost;
-    }
     public int FCost { get { return _gCost + _hCost; } }
     public Node(Vector2 pos, int posX, int posY)
     {
         this._position = pos;
         this._posX = posX;
         this._posY = posY;
-    }
-    int RoundToInt(float f)
-    {
-        return Mathf.RoundToInt(f);
     }
     public void SetGCost(int newCost)
     {
