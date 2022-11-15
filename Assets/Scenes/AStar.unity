@@ -150,7 +150,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 350641868}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 5.15, y: 3.6, z: 0}
+  m_LocalPosition: {x: 1.15, y: 3.08, z: 0}
   m_LocalScale: {x: 1, y: 3.7375, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -247,7 +247,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 400775665}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.92, y: 1.33, z: 0}
+  m_LocalPosition: {x: -1.55, y: 2.93, z: 0}
   m_LocalScale: {x: 0.3375, y: 3.7375, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -341,7 +341,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 407887371}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.24, y: 1.99, z: 0}
+  m_LocalPosition: {x: 4.98, y: -2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -363,7 +363,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &759159615
 Transform:
   m_ObjectHideFlags: 0
@@ -522,12 +522,13 @@ GameObject:
   m_Component:
   - component: {fileID: 1254137375}
   - component: {fileID: 1254137376}
+  - component: {fileID: 1254137377}
   m_Layer: 0
   m_Name: Pathfinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1254137375
 Transform:
@@ -556,16 +557,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0a4009252c92774d83052f92803cab3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  goal: {fileID: 407887372}
-  start: {fileID: 1536889763}
-  size: {x: 21, y: 10}
-  nodeRadius: 1
-  fontSize: 28
+  _grid: {fileID: 1254137377}
+  _start: {fileID: 1536889763}
+  _goal: {fileID: 407887372}
+  _fontSize: 0
   drawGizmos: 1
   showGCost: 1
-  showHCost: 0
-  showFCost: 0
-  showLine: 0
+  showHCost: 1
+  showFCost: 1
+  showLine: 1
+--- !u!114 &1254137377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1254137374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c4aa9f572c2bce489730243caf8ebe3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _gridSize: {x: 20, y: 10}
+  _nodeRadius: 1
+  _unwalkeableMask:
+    serializedVersion: 2
+    m_Bits: 64
+  _showGCost: 0
+  _showHCost: 0
+  _showFCost: 0
+  _showPath: 1
+  _fontSize: 21
 --- !u!1 &1294475341
 GameObject:
   m_ObjectHideFlags: 0
@@ -584,7 +606,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1294475342
 Transform:
   m_ObjectHideFlags: 0
@@ -593,7 +615,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1294475341}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.12, z: 0}
+  m_LocalPosition: {x: -1.53, y: -0.89, z: 0}
   m_LocalScale: {x: 1, y: 3.7375, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -687,7 +709,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1536889762}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.31, y: 3.89, z: -0.105949536}
+  m_LocalPosition: {x: -3, y: 4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -721,7 +743,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925150998}
   m_LocalRotation: {x: -0, y: -0, z: -0.5981238, w: 0.80140376}
-  m_LocalPosition: {x: -5.49, y: 1.33, z: 0}
+  m_LocalPosition: {x: -7.46, y: 2.02, z: 0}
   m_LocalScale: {x: 0.3375, y: 3.7375, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
