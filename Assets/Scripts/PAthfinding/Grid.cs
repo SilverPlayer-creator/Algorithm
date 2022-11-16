@@ -27,6 +27,10 @@ public class Grid : MonoBehaviour
     public Node[,] GetGrid { get { return _grid; } }
 
     List<Node> _path = new List<Node>();
+    private void Awake()
+    {
+        CreateGrid();
+    }
     [ContextMenu("Create Grid")]
     public void CreateGrid()
     {
@@ -66,7 +70,7 @@ public class Grid : MonoBehaviour
         int y = Mathf.RoundToInt((_gridSizeY - 1) * percentY);
         return _grid[x, y];
     }
-    public List<Node> NeighbourNodes(Node node)
+    public List<Node> ManhattenNeighbours(Node node)
     {
         List<Node> neighbouringNode = new List<Node>();
         int xCheck;

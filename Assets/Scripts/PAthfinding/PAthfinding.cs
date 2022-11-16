@@ -9,13 +9,9 @@ public class PAthfinding : MonoBehaviour
 
     [SerializeField] Transform _start = default, _goal = default;
 
-    [SerializeField] public int _fontSize;
+    [SerializeField] bool _manhatten;
 
-    public List<Node> finalPath = new List<Node>();
-
-    public bool drawGizmos;
-    public bool showGCost, showHCost, showFCost;
-    public bool showLine;
+     List<Node> _finalPath = new List<Node>();
 
     [ContextMenu("Find Path")]
     public void FindPath()
@@ -25,6 +21,10 @@ public class PAthfinding : MonoBehaviour
             Debug.LogError("No grid found!");
             return;
         }
+        FindPath(_start.position, _goal.position);
+    }
+    private void Update()
+    {
         FindPath(_start.position, _goal.position);
     }
     void FindPath(Vector3 startPos, Vector3 endPos)
@@ -37,7 +37,10 @@ public class PAthfinding : MonoBehaviour
 
         List<Node> openList = new List<Node>();
         HashSet<Node> closeList = new HashSet<Node>();
-        //startNode.SetGCost(0); 
+        foreach (Node n in _grid.GetGrid)
+        {
+            n.ResetCosts();
+        }
         openList.Add(startNode);//add the starting node to openList
         int listrunIndex = 0;
         while (openList.Count > 0)
@@ -45,16 +48,12 @@ public class PAthfinding : MonoBehaviour
             Node currentNode = openList[0];
             for (int i = 1; i < openList.Count; i++)
             {
-                //int gCost = openList[i].GCost;
-                //Debug.Log("Current node's gCost=" + openList[i].GCost);
-                //int hCost = openList[i].HCost;
                 if(openList[i].FCost < currentNode.FCost || openList[i].FCost == currentNode.FCost) //compare the costs
                 {
                     if(openList[i].HCost < currentNode.HCost)
                     {
                         currentNode = openList[i];
                     }
-                    //currentNode = openList[i];
                 }
             }
             openList.Remove(currentNode);
@@ -64,51 +63,28 @@ public class PAthfinding : MonoBehaviour
                 GetFinalPath(startNode, endNode);
                 return;
             }
-            foreach (Node neighbourNode in _grid.NeighbourNodes(currentNode))
-            {
-                if (!neighbourNode.Walkeable || closeList.Contains(neighbourNode))
+            List<Node> neighbourNodes = _manhatten ? _grid.ManhattenNeighbours(currentNode) : _grid.GetNeighbours(currentNode);
+
+                foreach (Node neighbourNode in neighbourNodes)
                 {
-                    continue;
-                }
-                //Vector2 difference = currentNode.Position - neighbourNode.Position;
-                //float xF = difference.x;
-                //float yF = difference.y;
-                //xF = Mathf.Abs(xF);
-                //int xPoint = Mathf.FloorToInt(xF);
-                //yF = Mathf.Abs(yF);
-                //int yPoint = Mathf.FloorToInt(yF);
-                //int neighBourCost = xPoint + yPoint;
-                //int moveCost = currentNode.GCost + neighBourCost;
-                //neighbourNode.SetGCost(neighBourCost);
-
-                //Debug.Log("Movecost: " + moveCost);
-
-                //if(moveCost < neighbourNode.GCost) //NEED TO SET THE GCOST BEFORE THIS?
-                //{
-                //    neighbourNode.SetGCost(moveCost);
-                //    Debug.Log("Set new gcost");
-                //    neighbourNode.SetParent(currentNode);
-
-                //    if (!openList.Contains(neighbourNode))
-                //    {
-                //        openList.Add(neighbourNode);
-                //    }
-                //}
-                int newMovCostToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbourNode);
-                if (newMovCostToNeighbour < neighbourNode.GCost || !openList.Contains(neighbourNode))
-                {
-                    neighbourNode.SetGCost(newMovCostToNeighbour);
-                    neighbourNode.SetHCost(GetDistance(neighbourNode, endNode));
-                    neighbourNode.SetParent(currentNode);
-                    if (!openList.Contains(neighbourNode))
+                    if (!neighbourNode.Walkeable || closeList.Contains(neighbourNode))
                     {
-                        openList.Add(neighbourNode);
+                        continue;
+                    }
+
+                    int newMovCostToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbourNode);
+                    if (newMovCostToNeighbour < neighbourNode.GCost || !openList.Contains(neighbourNode))
+                    {
+                        neighbourNode.SetGCost(newMovCostToNeighbour);
+                        neighbourNode.SetHCost(GetDistance(neighbourNode, endNode));
+                        neighbourNode.SetParent(currentNode);
+                        if (!openList.Contains(neighbourNode))
+                        {
+                            openList.Add(neighbourNode);
+                        }
                     }
                 }
-            }
-            listrunIndex++;
         }
-        Debug.Log("List run: " + listrunIndex + " times");
     }
     void GetFinalPath(Node startNode, Node endNode)
     {
@@ -130,8 +106,8 @@ public class PAthfinding : MonoBehaviour
             currentNode = currentNode.Parent;
         }
         path.Reverse();
-        this.finalPath = path;
-        _grid.SetPath(finalPath);
+        this._finalPath = path;
+        _grid.SetPath(_finalPath);
     }
     //List<Node> NeighbourNodes(Node neighbourNode)
     //{
@@ -191,52 +167,6 @@ public class PAthfinding : MonoBehaviour
             return 14*dstY+10 * (dstX - dstY);
         }
         return 14 * dstX + 10 * (dstY - dstX);
-    }
-    private void OnDrawGizmos()
-    {
-        //Gizmos.DrawWireCube(transform.position, new Vector2(size.x, size.y));
-
-        //if(grid == null)
-        //{
-        //    return;
-        //}
-        //if (drawGizmos)
-        //{
-        //    GUIStyle style = new GUIStyle();
-        //    style.fontSize = fontSize;
-        //    Gizmos.color = Color.white;
-        //    //Node startNode = NodeFromWorldPosition(start.position);
-        //    //Node endNode = NodeFromWorldPosition(goal.position);
-        //    foreach (Node node in grid)
-        //    {
-        //        Debug.Log("Draw cubes");
-
-        //        Gizmos.DrawWireCube(node.Position, Vector3.one * nodeRadius);
-        //        if (showGCost)
-        //        {
-        //            style.normal.textColor = Color.red;
-        //            Handles.Label(node.Position + (new Vector2(-.5f, .5f) * nodeRadius), "G: " + node.GCost.ToString(), style);
-        //        }
-        //        if (showHCost)
-        //        {
-        //            style.normal.textColor = Color.blue;
-        //            Handles.Label(node.Position + (new Vector2(.3f, .5f) * nodeRadius), "H: " + node.HCost, style);
-        //        }
-        //        if (showFCost)
-        //        {
-        //            style.normal.textColor = Color.green;
-        //            Handles.Label(node.Position, "F: " + node.FCost.ToString(), style);
-        //        }
-        //    }
-        //    if (showLine && finalPath != null)
-        //    {
-        //        for (int i = 0; i < finalPath.Count; i++)
-        //        {
-        //            Gizmos.color = Color.red;
-        //            Gizmos.DrawWireCube(finalPath[i].Position, Vector3.one * nodeRadius);
-        //        }
-        //    }
-        //}
     }
 }
 

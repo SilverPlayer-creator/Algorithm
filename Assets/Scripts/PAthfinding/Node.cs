@@ -60,4 +60,10 @@ public class Node
     {
         this.parent = parentNode;
     }
+
+    public void ResetCosts()
+    {
+        _gCost = 0;
+        _hCost = 0;
+    }
 }
