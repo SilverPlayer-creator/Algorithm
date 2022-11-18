@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEditor;
 
-public class PAthfinding : MonoBehaviour
+public class Pathfinding : MonoBehaviour
 {
     [SerializeField] Grid _grid = default;
 
@@ -12,6 +13,19 @@ public class PAthfinding : MonoBehaviour
     [SerializeField] bool _manhatten;
 
      List<Node> _finalPath = new List<Node>();
+
+     [Header("Path")] [SerializeField] private GameObject _openPath;
+
+     [SerializeField] private float _minAgentNodeDistance;
+     [SerializeField] private float _agentSpeed;
+     [SerializeField] private float _lerpSpeed;
+     
+
+     private bool _pathFound;
+
+     private int _nodeIndex = 0;
+
+     private Vector3 _targetPos;
 
     [ContextMenu("Find Path")]
     public void FindPath()
@@ -25,7 +39,43 @@ public class PAthfinding : MonoBehaviour
     }
     private void Update()
     {
-        FindPath(_start.position, _goal.position);
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            FindPath(_start.position, _goal.position);
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Ray mouseRay = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
+            if (Physics.Raycast(mouseRay, out RaycastHit hit))
+            {
+                Debug.Log("Hit" + hit.collider.name);
+                Collider hitCol = hit.collider;
+                if (hitCol.TryGetComponent(out SpaceType space))
+                {
+                    Debug.Log("Found space");
+                    _targetPos = hitCol.transform.position;
+                    Node targetNode = _grid.NodeFromWorldPosition(_targetPos);
+                    FindPath(_start.position, _targetPos);
+                }
+            }
+            // Vector3 mousePos = Input.mousePosition;
+            // Vector2 gridSize = _grid.GridSize;
+            // int x = (int)(mousePos.x + gridSize.x * 0.5f);
+            // int y = (int)(mousePos.y + gridSize.y * 0.5f);
+            // Debug.Log((mousePos));
+            // Debug.Log((x + " " + y));
+            // if (x > 0 && x < gridSize.x && y > 0 && y < gridSize.y)
+            // {
+            //     _targetPos = new Vector3(x, y, 0);
+            //     FindPath(_start.position, (Vector2)_targetPos);
+            // }
+        }
+        if (!_pathFound)
+        {
+            return;
+        }
+        MoveAgent(_finalPath);
     }
     void FindPath(Vector3 startPos, Vector3 endPos)
     {
@@ -61,6 +111,8 @@ public class PAthfinding : MonoBehaviour
             if(currentNode == endNode) //alternatively check if positions are the same?
             {
                 GetFinalPath(startNode, endNode);
+                ChangeSpaceType(endNode.Position, TypeOfSpace.Target);
+                _pathFound = true;
                 return;
             }
             List<Node> neighbourNodes = _manhatten ? _grid.ManhattenNeighbours(currentNode) : _grid.GetNeighbours(currentNode);
@@ -88,76 +140,22 @@ public class PAthfinding : MonoBehaviour
     }
     void GetFinalPath(Node startNode, Node endNode)
     {
-        //List<Node> finalPath = new List<Node>();
-        //Node currentNode = endNode;
-        //while(currentNode != startNode)
-        //{
-        //    finalPath.Add(currentNode);
-        //    currentNode = currentNode.Parent;
-        //}
-        //finalPath.Reverse();
-        //this.finalPath = finalPath;
+        //this._finalPath.Clear();
         List<Node> path = new List<Node>();
         Node currentNode = endNode;
 
-        while(currentNode != startNode)
+        while(currentNode != startNode && !_pathFound)
         {
             path.Add(currentNode);
+            //GameObject closed = Instantiate(_openPath, currentNode.Position, quaternion.identity);
+            ChangeSpaceType(currentNode.Position, TypeOfSpace.Path);
             currentNode = currentNode.Parent;
         }
         path.Reverse();
         this._finalPath = path;
         _grid.SetPath(_finalPath);
+        MoveAgent(this._finalPath);
     }
-    //List<Node> NeighbourNodes(Node neighbourNode)
-    //{
-    //    List<Node> neighbouringNode = new List<Node>();
-    //    int xCheck;
-    //    int yCheck;
-
-    //    //right side
-    //    xCheck = neighbourNode.PosX + 1;
-    //    yCheck = neighbourNode.PosY;
-    //    if(xCheck >= 0 && xCheck < gridSizeX)
-    //    {
-    //        if(yCheck >= 0 && yCheck < gridSizeY)
-    //        {
-    //            neighbouringNode.Add(grid[xCheck, yCheck]);
-    //        }
-    //    }
-    //    //left side
-    //    xCheck = neighbourNode.PosX - 1;
-    //    yCheck = neighbourNode.PosY;
-    //    if (xCheck >= 0 && xCheck < gridSizeX)
-    //    {
-    //        if (yCheck >= 0 && yCheck < gridSizeY)
-    //        {
-    //            neighbouringNode.Add(grid[xCheck, yCheck]);
-    //        }
-    //    }
-    //    //top side
-    //    xCheck = neighbourNode.PosX;
-    //    yCheck = neighbourNode.PosY + 1;
-    //    if (xCheck >= 0 && xCheck < gridSizeX)
-    //    {
-    //        if (yCheck >= 0 && yCheck < gridSizeY)
-    //        {
-    //            neighbouringNode.Add(grid[xCheck, yCheck]);
-    //        }
-    //    }
-    //    //bottom side
-    //    xCheck = neighbourNode.PosX;
-    //    yCheck = neighbourNode.PosY - 1;
-    //    if (xCheck >= 0 && xCheck < gridSizeX)
-    //    {
-    //        if (yCheck >= 0 && yCheck < gridSizeY)
-    //        {
-    //            neighbouringNode.Add(grid[xCheck, yCheck]);
-    //        }
-    //    }
-    //    return neighbouringNode;
-    //}
-        
     int GetDistance(Node nodeA, Node nodeB)
     {
         int dstX = Mathf.Abs(nodeA.GridX - nodeB.GridX);
@@ -167,6 +165,40 @@ public class PAthfinding : MonoBehaviour
             return 14*dstY+10 * (dstX - dstY);
         }
         return 14 * dstX + 10 * (dstY - dstX);
+    }
+
+    void MoveAgent(List<Node> path)
+    {
+        //make the agent move towards the next node in the path
+        //when its close enough, move towards the next node
+        //repeat until it's reached the end node
+        Vector2 pathPos = _finalPath[_nodeIndex].Position;
+        Vector2 agentPos = _start.transform.position;
+        _start.transform.position = Vector2.MoveTowards(agentPos, pathPos, _agentSpeed * Time.deltaTime);
+        float dist = Vector2.SqrMagnitude((Vector3)agentPos - _finalPath[_nodeIndex].Position);
+        if (dist <= _minAgentNodeDistance)
+        {
+            Vector2 lerpPos = Vector2.Lerp(agentPos, _finalPath[_nodeIndex].Position, _lerpSpeed * Time.deltaTime);
+            _start.position = lerpPos;
+            _nodeIndex++;
+            if (_nodeIndex == _finalPath.Count)
+            {
+                _pathFound = false;
+                _nodeIndex = 0;
+            }
+        }
+    }
+
+    void ChangeSpaceType(Vector2 pos, TypeOfSpace newType)
+    {
+        Collider[] col = Physics.OverlapSphere(pos, _grid.NodeRadius);
+        foreach (Collider c in col)
+        {
+            if (c.TryGetComponent(out SpaceType space))
+            {
+                space.SetType(newType);
+            }
+        }
     }
 }
 

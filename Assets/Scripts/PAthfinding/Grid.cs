@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,14 +6,43 @@ using UnityEditor;
 
 public class Grid : MonoBehaviour
 {
+    private GridSpaces _spaces;
+    
     public List<Node> Path
     {
         get { return _path; }
     }
 
+    [Header("Grid")] 
+    [SerializeField] private Transform _ground = default;
+    [SerializeField] private Texture2D _gridTexture = default;
     [SerializeField]  Vector2 _gridSize;
     [SerializeField] float _nodeRadius;
     [SerializeField] LayerMask _unwalkeableMask;
+    [SerializeField] private bool _toggleGrid;
+
+    private bool _showGrid;
+    public float NodeRadius => _nodeRadius;
+    public Vector2 GridSize => _gridSize;
+
+    public bool ShowGrid
+    {
+        get => _showGrid;
+        set
+        {
+            _showGrid = value;
+            Material m = _ground.GetComponent<MeshRenderer>().material;
+            if (_showGrid)
+            {
+                m.mainTexture = _gridTexture;
+                m.SetTextureScale("_MainTex", _gridSize);
+            }
+            else
+            {
+                m.mainTexture = null;
+            }
+        }
+    }
 
     [Header("Debug")]
     [SerializeField] bool _showGCost;
@@ -30,7 +60,24 @@ public class Grid : MonoBehaviour
     private void Awake()
     {
         CreateGrid();
+        ShowGrid = true;
+        _spaces = GetComponent<GridSpaces>();
+        _spaces.Initialize(_grid);
     }
+
+    private void Update()
+    {
+        if (_toggleGrid && !ShowGrid)
+        {
+            ShowGrid = true;
+        }
+
+        if (!_toggleGrid && ShowGrid)
+        {
+            ShowGrid = false;
+        }
+    }
+
     [ContextMenu("Create Grid")]
     public void CreateGrid()
     {
@@ -49,17 +96,11 @@ public class Grid : MonoBehaviour
                 _grid[x, y] = new Node(walkeable, worldPos, x, y);
             }
         }
+
+        _ground.localScale = new Vector3(_gridSize.x, _gridSize.y, 1);
     }
     public Node NodeFromWorldPosition(Vector3 worldPos)
     {
-        //Vector2 bottomLeft = (Vector2)transform.position - Vector2.right * _gridSize.x / 2 - Vector2.up * _gridSize.y / 2;
-        //int xPoint = Mathf.FloorToInt(((worldPos.x - bottomLeft.x) / _nodeDiameter));
-
-        //int yPoint = Mathf.FloorToInt(((worldPos.y - bottomLeft.y) / _nodeDiameter));
-        //Debug.Log("worldPos: " + worldPos);
-        //Debug.Log("Before clamping: " + "\n" + "xPoint: " + xPoint + " ,yPoint: " + yPoint);
-
-        //Debug.Log("After clamping: " + "\n" + "xPoint: " + xPoint + " ,yPoint: " + yPoint);
 
         float percentX = (worldPos.x + _gridSize.x / 2) / _gridSize.x;
         float percentY = (worldPos.y + _gridSize.y / 2) / _gridSize.y;

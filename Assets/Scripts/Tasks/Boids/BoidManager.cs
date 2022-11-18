@@ -51,7 +51,7 @@ public class BoidManager : MonoBehaviour
     {
         if (flockmates.Count == 0)
         {
-            return Vector2.zero;
+            return Vector2.up;
         }
 
         Vector2 separation = Vector2.zero;
@@ -77,7 +77,7 @@ public class BoidManager : MonoBehaviour
     {
         if (flockmates.Count == 0)
         {
-            return Vector2.zero;
+            return Vector2.up;
         }
 
         Vector2 cohesion = Vector2.zero;
@@ -95,7 +95,7 @@ public class BoidManager : MonoBehaviour
     {
         if (flockmates.Count == 0)
         {
-            return Vector2.zero;
+            return Vector2.up;
         }
 
         Vector2 alignmentMove = Vector2.zero;
