@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 161441359}
   - component: {fileID: 161441358}
   - component: {fileID: 161441357}
+  - component: {fileID: 161441361}
   m_Layer: 0
   m_Name: Agent
   m_TagString: Untagged
@@ -220,6 +221,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &161441361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161441356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd8d40e8d6849d94fb6d45496822532b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pathfinding: {fileID: 1254137378}
+  agentSpeed: 2
+  minAgentNodeDistance: 0.05
+  lerpSpeed: 1
 --- !u!1 &174689349
 GameObject:
   m_ObjectHideFlags: 0
@@ -345,7 +362,7 @@ Transform:
   m_GameObject: {fileID: 350641868}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 1.15, y: 3.08, z: 0}
-  m_LocalScale: {x: 1, y: 3.7375, z: 1}
+  m_LocalScale: {x: 0.7, y: 4, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 759159615}
@@ -442,7 +459,7 @@ Transform:
   m_GameObject: {fileID: 400775665}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -1.55, y: 2.93, z: 0}
-  m_LocalScale: {x: 0.3375, y: 3.7375, z: 1}
+  m_LocalScale: {x: 0.41875, y: 4, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 759159615}
@@ -536,7 +553,7 @@ Transform:
   m_GameObject: {fileID: 759159614}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1294475342}
@@ -606,7 +623,7 @@ Transform:
   m_GameObject: {fileID: 1146525208}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 2.3, y: -0.48, z: 0}
-  m_LocalScale: {x: 0.3375, y: 3.7375, z: 1}
+  m_LocalScale: {x: 0.7375, y: 4, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 759159615}
@@ -746,14 +763,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30c77f8ff2e0343489d67a97aa7ecfd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _grid: {fileID: 1254137377}
+  grid: {fileID: 1254137377}
   _start: {fileID: 161441360}
-  _goal: {fileID: 174689353}
   _manhatten: 0
-  _openPath: {fileID: 5591894245259650102, guid: f575ed73a77eaca4f95a2767229dec1e, type: 3}
-  _minAgentNodeDistance: 0.05
-  _agentSpeed: 2
-  _lerpSpeed: 2
 --- !u!114 &1254137379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -989,8 +1001,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925150998}
   m_LocalRotation: {x: -0, y: -0, z: -0.5981238, w: 0.80140376}
-  m_LocalPosition: {x: -7.46, y: 2.02, z: 0}
-  m_LocalScale: {x: 0.3375, y: 3.7375, z: 1}
+  m_LocalPosition: {x: -7.27, y: 2.02, z: 0}
+  m_LocalScale: {x: 0.5, y: 4, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 759159615}
