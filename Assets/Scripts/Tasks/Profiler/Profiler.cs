@@ -62,6 +62,7 @@ public class Profiler : MonoBehaviour
             StringCompareA(a, b);
             StringCompareB(a, b);
             StringCompareC(a, b);
+            StringCompareD(a, b);
         }
     }
 
@@ -72,6 +73,10 @@ public class Profiler : MonoBehaviour
 
     bool StringCompareB(string a, string b)
     {
+        if (a.Length != b.Length)
+        {
+            return false;
+        }
         for (int i = 0; i < Mathf.Min(a.Length, b.Length); i++)
         {
             if (a[i] != b[i])
@@ -85,11 +90,11 @@ public class Profiler : MonoBehaviour
 
     bool StringCompareC(string a, string b)
     {
-        if (string.Compare(a, b) == 0)
-        {
-            return true;
-        }
+        return string.Compare(a, b, true) == 0;
+    }
 
-        return false;
+    bool StringCompareD(string a, string b)
+    {
+        return a.ToUpper() == b.ToUpper();
     }
 }

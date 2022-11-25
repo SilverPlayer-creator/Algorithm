@@ -41,11 +41,12 @@ public class Movement : MonoBehaviour
         Vector2 pathPos = path[_nodeIndex].Position;
         Vector2 agentPos = transform.position;
         transform.position = Vector2.MoveTowards(agentPos, pathPos, agentSpeed * Time.deltaTime);
-        float dist = Vector2.SqrMagnitude((Vector3)agentPos - path[_nodeIndex].Position);
+        float dist = Vector2.SqrMagnitude(agentPos - pathPos);
         if (dist <= minAgentNodeDistance)
         {
-            Vector2 lerpPos = Vector2.Lerp(agentPos, path[_nodeIndex].Position, lerpSpeed * Time.deltaTime);
-            transform.position = lerpPos;
+            //lerping uneccesary, makes work for artists and programmers harder
+            //Vector2 lerpPos = Vector2.Lerp(agentPos, path[_nodeIndex].Position, lerpSpeed * Time.deltaTime);
+            transform.position = pathPos;
             _nodeIndex++;
             if (_nodeIndex == path.Count)
             {

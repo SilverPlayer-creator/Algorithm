@@ -235,7 +235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pathfinding: {fileID: 1254137378}
   agentSpeed: 2
-  minAgentNodeDistance: 0.05
+  minAgentNodeDistance: 0.01
   lerpSpeed: 1
 --- !u!1 &174689349
 GameObject:
@@ -543,7 +543,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &759159615
 Transform:
   m_ObjectHideFlags: 0

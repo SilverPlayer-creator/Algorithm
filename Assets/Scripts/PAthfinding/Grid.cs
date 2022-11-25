@@ -99,6 +99,12 @@ public class Grid : MonoBehaviour
 
         _ground.localScale = new Vector3(_gridSize.x, _gridSize.y, 1);
     }
+
+    public void TurnNodeIntoObstacle(Vector3 worldPos)
+    {
+        Node targetNode = NodeFromWorldPosition(worldPos);
+        targetNode.SetAsObstacle();
+    }
     public Node NodeFromWorldPosition(Vector3 worldPos)
     {
 

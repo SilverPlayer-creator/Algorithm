@@ -38,11 +38,29 @@ public class Pathfinding : MonoBehaviour
                 }
             }
         }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            Ray mouseRay = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
+            if (Physics.Raycast(mouseRay, out RaycastHit hit))
+            {
+                //Debug.Log("Hit" + hit.collider.name);
+                Collider hitCol = hit.collider;
+                if (hitCol.TryGetComponent(out SpaceType space))
+                {
+                    //Debug.Log("Found space");
+                    _targetPos = hitCol.transform.position;
+                    ChangeSpaceType(_targetPos, TypeOfSpace.Obstacle);
+                    Node n = grid.NodeFromWorldPosition(_targetPos);
+                    n.SetAsObstacle();
+                }
+            }
+        }
     }
 
     void FindPath(Vector3 startPos, Vector3 endPos)
     {
-        _pathFound = false;
+            _pathFound = false;
             //check each surrounding node from a starting point
             //compare the nodes f cost
             //go with the node that has the smallest f cost
@@ -126,6 +144,10 @@ public class Pathfinding : MonoBehaviour
                 currentNode = currentNode.Parent;
             }
 
+            if (path.Count == 0)
+            {
+                return;
+            }
             path.Reverse();
             this._finalPath = path;
             //grid.SetPath(_finalPath);
@@ -159,7 +181,7 @@ public class Pathfinding : MonoBehaviour
             Collider[] col = Physics.OverlapSphere(pos, grid.NodeRadius);
             foreach (Collider c in col)
             {
-                if (c.TryGetComponent(out SpaceType space))
+                if (c.TryGetComponent(out SpaceType space) && space.Type != TypeOfSpace.Obstacle)
                 {
                     space.SetType(newType);
                 }

@@ -60,7 +60,10 @@ public class Node
     {
         this.parent = parentNode;
     }
-
+    public void SetAsObstacle()
+    {
+        _walkeable = false;
+    }
     public void ResetCosts()
     {
         _gCost = 0;
