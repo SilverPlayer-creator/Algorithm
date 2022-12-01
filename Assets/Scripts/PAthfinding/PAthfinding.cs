@@ -9,6 +9,7 @@ using UnityEngine.Serialization;
 public class Pathfinding : MonoBehaviour
 {
     public Action<List<Node>> OnPathChosen;
+    public Action OnPathInvalid;
 
     [FormerlySerializedAs("_grid")] [SerializeField] Grid grid = default;
 
@@ -20,44 +21,34 @@ public class Pathfinding : MonoBehaviour
 
      private bool _pathFound;
 
-     private Vector3 _targetPos;
-     private void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Ray mouseRay = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
-            if (Physics.Raycast(mouseRay, out RaycastHit hit))
-            {
-                //Debug.Log("Hit" + hit.collider.name);
-                Collider hitCol = hit.collider;
-                if (hitCol.TryGetComponent(out SpaceType space))
-                {
-                    //Debug.Log("Found space");
-                    _targetPos = hitCol.transform.position;
-                    FindPath(_start.position, _targetPos);
-                }
-            }
-        }
+     private Vector3 _obstacleTargetPos;
+     private Vector3 _agentPathPos;
 
-        if (Input.GetMouseButtonDown(1))
-        {
-            Ray mouseRay = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
-            if (Physics.Raycast(mouseRay, out RaycastHit hit))
-            {
-                //Debug.Log("Hit" + hit.collider.name);
-                Collider hitCol = hit.collider;
-                if (hitCol.TryGetComponent(out SpaceType space))
-                {
-                    //Debug.Log("Found space");
-                    _targetPos = hitCol.transform.position;
-                    ChangeSpaceType(_targetPos, TypeOfSpace.Obstacle);
-                    Node n = grid.NodeFromWorldPosition(_targetPos);
-                    n.SetAsObstacle();
-                }
-            }
-        }
-    }
+     private MouseInput _mouseInput;
 
+     private void Awake()
+     {
+         _mouseInput = GetComponent<MouseInput>();
+         _mouseInput.OnPathSet += CreatePath;
+         _mouseInput.OnObstacleSet += SetObstacle;
+
+     }
+
+     void CreatePath(Vector2 mousePos)
+     {
+         Ray mouseRay = Camera.main.ScreenPointToRay(new Vector3(mousePos.x, mousePos.y, 0));
+         if (Physics.Raycast(mouseRay, out RaycastHit hit))
+         {
+             //Debug.Log("Hit" + hit.collider.name);
+             Collider hitCol = hit.collider;
+             if (hitCol.TryGetComponent(out SpaceType space))
+             {
+                 //Debug.Log("Found space");
+                 _obstacleTargetPos = hitCol.transform.position;
+                 FindPath(_start.position, _obstacleTargetPos);
+             }
+         }
+     }
     void FindPath(Vector3 startPos, Vector3 endPos)
     {
             _pathFound = false;
@@ -96,6 +87,7 @@ public class Pathfinding : MonoBehaviour
                 {
                     GetFinalPath(startNode, endNode);
                     ChangeSpaceType(endNode.Position, TypeOfSpace.Target);
+                    _agentPathPos = endNode.Position;
                     return;
                 }
 
@@ -122,7 +114,7 @@ public class Pathfinding : MonoBehaviour
                     }
                 }
             }
-        }
+    }
 
         void GetFinalPath(Node startNode, Node endNode)
         {
@@ -176,6 +168,28 @@ public class Pathfinding : MonoBehaviour
             _finalPath.Clear();
         }
 
+        void SetObstacle(Vector2 pos)
+        {
+            Ray mouseRay = Camera.main.ScreenPointToRay(new Vector3(pos.x, pos.y, 0));
+            if (Physics.Raycast(mouseRay, out RaycastHit hit))
+            {
+                //Debug.Log("Hit" + hit.collider.name);
+                Collider hitCol = hit.collider;
+                if (hitCol.TryGetComponent(out SpaceType space) && space.Type != TypeOfSpace.Obstacle)
+                {
+                    _obstacleTargetPos = hitCol.transform.position;
+                    ChangeSpaceType(_obstacleTargetPos, TypeOfSpace.Obstacle);
+                    Node n = grid.NodeFromWorldPosition(_obstacleTargetPos);
+                    n.SetAsObstacle();
+                    if (_finalPath.Contains(n))
+                    {
+                        ResetPath();
+                        FindPath(_start.position, _agentPathPos);
+                        OnPathInvalid?.Invoke();
+                    }
+                }
+            }
+        }
         private void ChangeSpaceType(Vector2 pos, TypeOfSpace newType)
         {
             Collider[] col = Physics.OverlapSphere(pos, grid.NodeRadius);

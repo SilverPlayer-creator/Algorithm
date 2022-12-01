@@ -22,6 +22,7 @@ public class Movement : MonoBehaviour
     private void Awake()
     {
         pathfinding.OnPathChosen += GetPath;
+        //pathfinding.OnPathInvalid += Stop;
     }
 
     private void Update()
@@ -65,6 +66,12 @@ public class Movement : MonoBehaviour
         _pathFound = true;
     }
 
+    void Stop()
+    {
+        _pathFound = false;
+        _finalPath.Clear();
+        _nodeIndex = 0;
+    }
     private void OnDisable()
     {
         pathfinding.OnPathChosen -= GetPath;
