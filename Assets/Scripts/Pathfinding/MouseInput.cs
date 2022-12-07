@@ -24,7 +24,7 @@ public class MouseInput : MonoBehaviour
 
     void OnMakeObstacle(InputValue value)
     {
-        Debug.Log("Mouse two");
+//        Debug.Log("Mouse two");
         Vector2 mousePos = Mouse.current.position.ReadValue();
         OnObstacleSet?.Invoke(mousePos);
     }
