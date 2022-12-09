@@ -16,6 +16,7 @@ public class Pathfinding : MonoBehaviour
     [SerializeField] private Transform _start = default;
 
     [SerializeField] bool _manhatten;
+    [SerializeField] private LayerMask _spaceMask;
 
      private List<Node> _finalPath = new List<Node>();
 
@@ -163,7 +164,11 @@ public class Pathfinding : MonoBehaviour
         {
             foreach (Node n in _finalPath)
             {
-                ChangeSpaceType(n.Position, TypeOfSpace.Empty);
+                SpaceType space = GetSpaceFromNode(n);
+                if (space.Type != TypeOfSpace.Obstacle)
+                {
+                    ChangeSpaceType(n.Position, TypeOfSpace.Empty);
+                }
             }
             _finalPath.Clear();
         }
@@ -175,17 +180,35 @@ public class Pathfinding : MonoBehaviour
             {
                 //Debug.Log("Hit" + hit.collider.name);
                 Collider hitCol = hit.collider;
-                if (hitCol.TryGetComponent(out SpaceType space) && space.Type != TypeOfSpace.Obstacle)
+                if (hitCol.TryGetComponent(out SpaceType space))
                 {
                     _obstacleTargetPos = hitCol.transform.position;
-                    ChangeSpaceType(_obstacleTargetPos, TypeOfSpace.Obstacle);
                     Node n = grid.NodeFromWorldPosition(_obstacleTargetPos);
-                    n.SetAsObstacle();
-                    if (_finalPath.Contains(n))
+                    switch (space.Type)
                     {
-                        ResetPath();
-                        FindPath(_start.position, _agentPathPos);
-                        OnPathInvalid?.Invoke();
+                        case TypeOfSpace.Empty:
+                            ChangeSpaceType(_obstacleTargetPos, TypeOfSpace.Obstacle);
+                            n.SetAsObstacle();
+                            break;
+                        case TypeOfSpace.Path:
+                            ChangeSpaceType(_obstacleTargetPos, TypeOfSpace.Obstacle);
+                            n.SetAsObstacle();
+                            if (_finalPath.Contains(n))
+                            {
+                                ResetPath();
+                                FindPath(_start.position, _agentPathPos);
+                            }
+                            break;
+                        case TypeOfSpace.Target:
+                            ChangeSpaceType(_obstacleTargetPos, TypeOfSpace.Obstacle);
+                            n.SetAsObstacle();
+                            ResetPath();
+                            OnPathInvalid?.Invoke();
+                            break;
+                        case TypeOfSpace.Obstacle:
+                            ChangeSpaceType(_obstacleTargetPos, TypeOfSpace.Empty);
+                            n.RemoveObstacle();
+                            break;
                     }
                 }
             }
@@ -195,11 +218,23 @@ public class Pathfinding : MonoBehaviour
             Collider[] col = Physics.OverlapSphere(pos, grid.NodeRadius);
             foreach (Collider c in col)
             {
-                if (c.TryGetComponent(out SpaceType space) && space.Type != TypeOfSpace.Obstacle)
+                if (c.TryGetComponent(out SpaceType space))
                 {
                     space.SetType(newType);
                 }
             }
+        }
+        SpaceType GetSpaceFromNode(Node node)
+        {
+            Collider[] col = Physics.OverlapSphere(node.Position, grid.NodeRadius);
+            foreach (Collider c in col)
+            {
+                if (c.TryGetComponent(out SpaceType space))
+                {
+                    return space;
+                }
+            }
+            return null;
         }
     }
 

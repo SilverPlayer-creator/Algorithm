@@ -14,19 +14,22 @@ public class MouseInput : MonoBehaviour
         _inputAction = new PlayerInputAction();
     }
 
-    public void OnSetPath(InputValue value)
+    public void OnSetPath(InputAction.CallbackContext ctx)
     {
-        //Debug.Log("Mouse one clicked");
-        Vector2 mousePos = Mouse.current.position.ReadValue();
-        //Debug.Log("Mouse hit at vector2: " + mousePos);
-        OnPathSet?.Invoke(mousePos);
+        if (ctx.performed)
+        {
+            Vector2 mousePos = Mouse.current.position.ReadValue();
+            OnPathSet?.Invoke(mousePos);
+        }
     }
 
-    void OnMakeObstacle(InputValue value)
+    public void OnMakeObstacle(InputAction.CallbackContext ctx)
     {
-//        Debug.Log("Mouse two");
-        Vector2 mousePos = Mouse.current.position.ReadValue();
-        OnObstacleSet?.Invoke(mousePos);
+        if (ctx.performed)
+        {
+            Vector2 mousePos = Mouse.current.position.ReadValue();
+            OnObstacleSet?.Invoke(mousePos);
+        }
     }
     public UnityAction<Vector2> OnPathSet;
     public UnityAction<Vector2> OnObstacleSet;

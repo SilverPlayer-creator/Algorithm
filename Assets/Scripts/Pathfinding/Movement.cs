@@ -22,7 +22,7 @@ public class Movement : MonoBehaviour
     private void Awake()
     {
         pathfinding.OnPathChosen += GetPath;
-        //pathfinding.OnPathInvalid += Stop;
+        pathfinding.OnPathInvalid += Stop;
     }
 
     private void Update()

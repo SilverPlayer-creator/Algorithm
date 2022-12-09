@@ -64,6 +64,11 @@ public class Node
     {
         _walkeable = false;
     }
+
+    public void RemoveObstacle()
+    {
+        _walkeable = true;
+    }
     public void ResetCosts()
     {
         _gCost = 0;
